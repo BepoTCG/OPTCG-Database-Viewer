@@ -12,6 +12,7 @@
       display: flex;
       justify-content: flex-start;
       align-items: flex-start;
+      flex-wrap: wrap;
       gap:2em;
     }
     select, input {
@@ -98,10 +99,29 @@
             Stage
         </label>
       </div>
+      <div class="counter">
+        <label>Counter:</label>
+        <label>
+          <input type="checkbox" name="counter" onchange="updateFilteredCards()" value="0">
+            None
+        </label>
+        <label>
+          <input type="checkbox" name="counter" onchange="updateFilteredCards()" value="1000">
+            1000
+        </label>
+        <label>
+          <input type="checkbox" name="counter" onchange="updateFilteredCards()" value="2000">
+            2000
+        </label>
+      </div>
+      <div class="search">
+        <label>Text Search:</label>
+        <input type="text" placeholder="strawhat" onchange="updateFilteredCards()" />
+      </div>
       <div class="sort">
         <label>Sort:</label>
         <select onchange="updateFilteredCards()">
-          <option value="">None</option>
+          <option value="none">None</option>
           <option value="costASC">Cost ⬆</option>
           <option value="costDESC">Cost ⬇</option>
         </select>
@@ -116,12 +136,19 @@
     const allCards = [];
     var filteredCards = [];
     function updateFilteredCards(){
+      const searchFilter = document.querySelector(".search input[type='text']").value;
       const colorFilter = Array.from(document.querySelectorAll("input[name='color']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const categoryFilter = Array.from(document.querySelectorAll("input[name='category']")).map(({value, checked})=>checked && value).filter(value =>!!value);
+      const counterFilter = Array.from(document.querySelectorAll("input[name='counter']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const sortCriteria = document.querySelector(".sort select").value;
       filteredCards = allCards;
 
 
+      if(searchFilter)
+        filteredCards = filteredCards.filter(({name, type, effect, trigger})=>{
+          const searchableFields = [name, type, effect, trigger];
+          return searchableFields.some((field)=> field.toLowerCase().includes(searchFilter.toLowerCase()));
+      })
       if(colorFilter.length>0)
         filteredCards = filteredCards.filter(({color}) =>
           colorFilter.includes(color.toLowerCase())
@@ -130,13 +157,17 @@
       filteredCards = filteredCards.filter(({category}) =>
         categoryFilter.includes(category.toLowerCase())
       )
+      if(counterFilter.length>0)
+      filteredCards = filteredCards.filter(({counter}) =>
+        counterFilter.includes(counter)
+      )
 
-      if(!!sortCriteria)
+      if(sortCriteria!=='none')
       filteredCards.sort((a, b)=> {
           console.log({sortCriteria})
           if(sortCriteria === 'costASC')
             return a.cost - b.cost;
-          else
+          else if (sortCriteria === 'costDESC')
             return b.cost - a.cost;
       })
       
@@ -151,7 +182,7 @@
 
           const image = document.createElement('img');
           image.classList.add('card-image');
-          image.src = `https://asia-en.onepiece-cardgame.com/images/cardlist/card/${item.code}.png?240222`;
+          image.src = item.image;
           card.appendChild(image);
 
           cardContainer.appendChild(card);
