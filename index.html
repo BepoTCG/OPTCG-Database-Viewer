@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPTCG Card List</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <style>
+    .filters{
+      margin: 1em;
+      border-bottom: #ccc;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap:2em;
+    }
+    select, input {
+      max-width: 400px;
+    }
+    .card-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .card {
+      margin: 1em;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      width: 194px;
+      height: 271px;
+    }
+    .card-image {
+
+      transition: all 0.15s ease-in-out;
+    }
+    .card-image:hover{
+      transform: scale(1.7);
+    }
+
+    .card-content {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>OPTCG Card List</h1>
+    <div class="filters">
+      <div class="colors">
+        <label>Colors:</label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="red">
+          Red
+        </label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="green">
+          Green
+        </label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="blue">
+          Blue
+        </label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="purple">
+          Purple
+        </label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="yellow">
+          Yellow
+        </label>
+        <label>
+          <input type="checkbox" name="color" onchange="updateFilteredCards()" value="black">
+          Black
+        </label>
+        </div>
+      <div class="category">
+        <label>Category:</label>
+        <label>
+          <input type="checkbox" name="category" onchange="updateFilteredCards()" value="leader">
+            Leader
+        </label>
+        <label>
+          <input type="checkbox" name="category" onchange="updateFilteredCards()" value="character">
+            Character
+        </label>
+        <label>
+          <input type="checkbox" name="category" onchange="updateFilteredCards()" value="event">
+            Event
+        </label>
+        <label>
+          <input type="checkbox" name="category" onchange="updateFilteredCards()" value="stage">
+            Stage
+        </label>
+      </div>
+      <div class="sort">
+        <label>Sort:</label>
+        <select onchange="updateFilteredCards()">
+          <option value="">None</option>
+          <option value="costASC">Cost ⬆</option>
+          <option value="costDESC">Cost ⬇</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-container"></div>
+  </main>
+
+  <script>
+
+    const cardContainer = document.querySelector('.card-container');
+    const allCards = [];
+    var filteredCards = [];
+    function updateFilteredCards(){
+      const colorFilter = Array.from(document.querySelectorAll("input[name='color']")).map(({value, checked})=>checked && value).filter(value =>!!value);
+      const categoryFilter = Array.from(document.querySelectorAll("input[name='category']")).map(({value, checked})=>checked && value).filter(value =>!!value);
+      const sortCriteria = document.querySelector(".sort select").value;
+      filteredCards = allCards;
+
+
+      if(colorFilter.length>0)
+        filteredCards = filteredCards.filter(({color}) =>
+          colorFilter.includes(color.toLowerCase())
+        )
+      if(categoryFilter.length>0)
+      filteredCards = filteredCards.filter(({category}) =>
+        categoryFilter.includes(category.toLowerCase())
+      )
+
+      if(!!sortCriteria)
+      filteredCards.sort((a, b)=> {
+          console.log({sortCriteria})
+          if(sortCriteria === 'costASC')
+            return a.cost - b.cost;
+          else
+            return b.cost - a.cost;
+      })
+      
+      displayFilteredCards();
+    }
+
+    function displayFilteredCards(){
+      cardContainer.innerHTML = "";
+      filteredCards.forEach(item => {
+          const card = document.createElement('div');
+          card.classList.add('card');
+
+          const image = document.createElement('img');
+          image.classList.add('card-image');
+          image.src = `https://asia-en.onepiece-cardgame.com/images/cardlist/card/${item.code}.png?240222`;
+          card.appendChild(image);
+
+          cardContainer.appendChild(card);
+        });
+    }
+
+
+    fetch('OPTCG.json')
+      .then(response => response.json())
+      .then(data => {
+        allCards.push(...data);
+        filteredCards = allCards;
+        displayFilteredCards();
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        const message = document.createElement('p');
+        message.textContent = 'Error loading card data.';
+        cardContainer.appendChild(message);
+      });
+  </script>
+</body>
+</html>
