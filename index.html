@@ -183,6 +183,10 @@
           const image = document.createElement('img');
           image.classList.add('card-image');
           image.src = item.image;
+          image.attributes.onerror=``
+          image.addEventListener('error', function() {
+            this.src=item.image.replace('//en.', '//')
+          });
           card.appendChild(image);
 
           cardContainer.appendChild(card);
@@ -193,8 +197,14 @@
     fetch('OPTCG.json')
       .then(response => response.json())
       .then(data => {
-        allCards.push(...data);
+        allCards.push(...data.cards.map(card=> {
+          translation = data.card_locales.find((translation) => translation.code === card.code);
+          console.log({card, translation})
+          return {...card, ...translation}
+        }
+        ));
         filteredCards = allCards;
+        // console.log({allCards})
         displayFilteredCards();
       })
       .catch(error => {
