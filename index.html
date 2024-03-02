@@ -184,28 +184,18 @@
           const card = document.createElement('div');
           card.classList.add('card');
 
-//           <picture>
-//   <source srcset="primary-image.webp" type="image/webp">
-//   <source srcset="primary-image.jpg" type="image/jpeg">
-//   <img src="primary-image.jpg" alt="Image description">
-// </picture>
           const image = document.createElement('picture');
           image.classList.add('card-image');
+
           preferredSource = document.createElement('source');
           preferredSource.setAttribute('srcset', item.image);
-          // preferredSource.type = "image/png";
           backupSource = document.createElement('source');
           backupSource.setAttribute('srcset', item.backup_image);
 
-          // backupSource.type = "image/png";
           fallbackImage = document.createElement('img');
           fallbackImage.src = item.backup_image;
-          // fallbackImage.onerror = ()=>{imageErrorHandler(this)};
+          fallbackImage.loading="lazy";
           fallbackImage.onerror = function() {
-            // if (event.target.tagName === "IMG") {
-            //   // The event target is the image element with the specified class
-            //   event.target.src = "fallback-image.jpg";
-            // }
             this.onerror = null;
             this.parentNode.children[0].srcset = this.parentNode.children[1].srcset = this.src;
             return true;
@@ -215,10 +205,6 @@
           image.appendChild(backupSource);
           image.appendChild(fallbackImage);
           card.appendChild(image);
-
-          // const name = document.createElement('span');
-          // name.innerText = item.name;
-          // card.appendChild(name);
 
           cardContainer.appendChild(card);
         });
