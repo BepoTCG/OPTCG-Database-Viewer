@@ -145,8 +145,8 @@
 
 
       if(searchFilter)
-        filteredCards = filteredCards.filter(({name, type, effect, trigger})=>{
-          const searchableFields = [name, type, effect, trigger];
+        filteredCards = filteredCards.filter(({name, type, effect, trigger, code})=>{
+          const searchableFields = [name, type, effect, trigger, code];
           return searchableFields.some((field)=> field.toLowerCase().includes(searchFilter.toLowerCase()));
       })
       if(colorFilter.length>0)
@@ -164,7 +164,6 @@
 
       if(sortCriteria!=='none')
       filteredCards.sort((a, b)=> {
-          console.log({sortCriteria})
           if(sortCriteria === 'costASC')
             return a.cost - b.cost;
           else if (sortCriteria === 'costDESC')
@@ -183,10 +182,6 @@
           const image = document.createElement('img');
           image.classList.add('card-image');
           image.src = item.image;
-          image.attributes.onerror=``
-          image.addEventListener('error', function() {
-            this.src=item.image.replace('//en.', '//')
-          });
           card.appendChild(image);
 
           cardContainer.appendChild(card);
@@ -198,13 +193,11 @@
       .then(response => response.json())
       .then(data => {
         allCards.push(...data.cards.map(card=> {
-          translation = data.card_locales.find((translation) => translation.code === card.code);
-          console.log({card, translation})
+          translation = data.card_locales.find((translation) => translation.code === card.code && translation.art_variant === card.art_variant) | {};
           return {...card, ...translation}
         }
         ));
         filteredCards = allCards;
-        // console.log({allCards})
         displayFilteredCards();
       })
       .catch(error => {
