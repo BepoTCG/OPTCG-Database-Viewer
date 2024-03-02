@@ -37,7 +37,6 @@
       height: 271px;
     }
     .card-image {
-
       transition: all 0.15s ease-in-out;
     }
     .card-image:hover{
@@ -173,16 +172,53 @@
       displayFilteredCards();
     }
 
+    function imageErrorHandler(element) {
+      console.log(element);
+      element.onerror = null;
+      element.parentNode.children[0].srcset = element.parentNode.children[1].srcset = element.src;
+    }
+
     function displayFilteredCards(){
       cardContainer.innerHTML = "";
       filteredCards.forEach(item => {
           const card = document.createElement('div');
           card.classList.add('card');
 
-          const image = document.createElement('img');
+//           <picture>
+//   <source srcset="primary-image.webp" type="image/webp">
+//   <source srcset="primary-image.jpg" type="image/jpeg">
+//   <img src="primary-image.jpg" alt="Image description">
+// </picture>
+          const image = document.createElement('picture');
           image.classList.add('card-image');
-          image.src = item.image;
+          preferredSource = document.createElement('source');
+          preferredSource.setAttribute('srcset', item.image);
+          // preferredSource.type = "image/png";
+          backupSource = document.createElement('source');
+          backupSource.setAttribute('srcset', item.backup_image);
+
+          // backupSource.type = "image/png";
+          fallbackImage = document.createElement('img');
+          fallbackImage.src = item.backup_image;
+          // fallbackImage.onerror = ()=>{imageErrorHandler(this)};
+          fallbackImage.onerror = function() {
+            // if (event.target.tagName === "IMG") {
+            //   // The event target is the image element with the specified class
+            //   event.target.src = "fallback-image.jpg";
+            // }
+            this.onerror = null;
+            this.parentNode.children[0].srcset = this.parentNode.children[1].srcset = this.src;
+            return true;
+          };
+
+          image.appendChild(preferredSource);
+          image.appendChild(backupSource);
+          image.appendChild(fallbackImage);
           card.appendChild(image);
+
+          // const name = document.createElement('span');
+          // name.innerText = item.name;
+          // card.appendChild(name);
 
           cardContainer.appendChild(card);
         });
@@ -192,9 +228,10 @@
     fetch('OPTCG.json')
       .then(response => response.json())
       .then(data => {
+        console.log({data, test:{...data.cards[0], ...data.card_locales[0]}});
         allCards.push(...data.cards.map(card=> {
-          translation = data.card_locales.find((translation) => translation.code === card.code && translation.art_variant === card.art_variant) | {};
-          return {...card, ...translation}
+          translation = data.card_locales.find((translation) => translation.code === card.code && translation.art_variant === card.art_variant);
+          return {...card, ...translation, backup_image: card.image}
         }
         ));
         filteredCards = allCards;
