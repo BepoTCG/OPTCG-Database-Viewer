@@ -117,6 +117,13 @@
         <label>Text Search:</label>
         <input type="text" placeholder="strawhat" onchange="updateFilteredCards()" />
       </div>
+      <div class="alternate">
+        <label>Alternate arts (Parallel):</label>
+        <label>
+          <input type="checkbox" name="hide_alternate_art" onchange="updateFilteredCards()" value="true">
+            Hide
+        </label>
+      </div>
       <div class="sort">
         <label>Sort:</label>
         <select onchange="updateFilteredCards()">
@@ -139,6 +146,7 @@
       const colorFilter = Array.from(document.querySelectorAll("input[name='color']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const categoryFilter = Array.from(document.querySelectorAll("input[name='category']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const counterFilter = Array.from(document.querySelectorAll("input[name='counter']")).map(({value, checked})=>checked && value).filter(value =>!!value);
+      const alternateArtFilter = Array.from(document.querySelectorAll("input[name='hide_alternate_art']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const sortCriteria = document.querySelector(".sort select").value;
       filteredCards = allCards;
 
@@ -160,6 +168,8 @@
       filteredCards = filteredCards.filter(({counter}) =>
         counterFilter.includes(counter)
       )
+      if(alternateArtFilter.length>0)
+      filteredCards = filteredCards.filter(({art_variant})=> art_variant === 0)
 
       if(sortCriteria!=='none')
       filteredCards.sort((a, b)=> {
