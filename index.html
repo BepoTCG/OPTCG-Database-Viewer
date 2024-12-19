@@ -13,10 +13,11 @@
       justify-content: flex-start;
       align-items: flex-start;
       flex-wrap: wrap;
-      gap:2em;
+      gap:1em;
+      font-size: 16px;
     }
     select, input {
-      max-width: 400px;
+      max-width: 300px;
     }
     .card-container {
       display: flex;
@@ -113,6 +114,73 @@
             2000
         </label>
       </div>
+      <div>
+        <label>Effects:</label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="atk">
+          When Attacking
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="don">
+          DON!! x
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="oatk">
+          On Your Opponent's Attack
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="opt">
+          Once Per Turn
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="opl">
+          On Play
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="rsh">
+          Rush
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="blk">
+          Blocker
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="onblk">
+          On Block
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="main">
+          Activate: Main
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="trg">
+          Trigger
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="ctr">
+          Counter
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="end">
+          End of Your Turn
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="oko">
+          On K.O.
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="trn">
+          Your Turn
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="bsh">
+          Banish
+        </label>
+        <label>
+          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="dbl">
+          Double Attack
+        </label>
+      </div>
       <div class="search">
         <label>Text Search:</label>
         <input type="text" placeholder="strawhat" onchange="updateFilteredCards()" />
@@ -142,12 +210,33 @@
     const allCards = [];
     var filteredCards = [];
     function updateFilteredCards(){
+
+      const tag_map = {
+        atk: "When Attacking",
+        don: "DON!! x",
+        oatk: "On Your Opponent's Attack",
+        opt: "Once Per Turn",
+        opl: "On Play",
+        rsh: "Rush",
+        blk: "Blocker",
+        onblk: "On Block",
+        main: "Activate: Main",
+        trg: "Trigger",
+        ctr: "Counter",
+        end: "End of Your Turn",
+        oko: "On K.O.",
+        trn: "Your Turn",
+        bsh: "Banish",
+        dbl: "Double Attack"
+      }
+
       const searchFilter = document.querySelector(".search input[type='text']").value;
       const colorFilter = Array.from(document.querySelectorAll("input[name='color']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const categoryFilter = Array.from(document.querySelectorAll("input[name='category']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const counterFilter = Array.from(document.querySelectorAll("input[name='counter']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const alternateArtFilter = Array.from(document.querySelectorAll("input[name='hide_alternate_art']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       const sortCriteria = document.querySelector(".sort select").value;
+      const tagCriteria = Array.from(document.querySelectorAll("input[name='tag']")).map(({value, checked})=>checked && value).filter(value =>!!value);
       filteredCards = allCards;
 
 
@@ -170,9 +259,16 @@
       )
       if(alternateArtFilter.length>0)
       filteredCards = filteredCards.filter(({art_variant})=> art_variant === 0)
+      if(tagCriteria.length>0)
+      filteredCards = filteredCards.filter(({tags}) => {
+          if(!tags)
+            return false;
+          const tagSet = new Set(tags.split(','));
+          return tagCriteria.every(element => tagSet.has(element));
+      });
+      console.log({filteredCards});
 
       filteredCards.sort((a, b)=> {
-          console.log(a.code, b.code);
           if(sortCriteria === 'code')
             return a.code.localeCompare(b.code);
           else if(sortCriteria === 'costASC')
