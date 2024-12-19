@@ -127,7 +127,7 @@
       <div class="sort">
         <label>Sort:</label>
         <select onchange="updateFilteredCards()">
-          <option value="none">None</option>
+          <option value="code">Code</option>
           <option value="costASC">Cost ⬆</option>
           <option value="costDESC">Cost ⬇</option>
         </select>
@@ -171,9 +171,11 @@
       if(alternateArtFilter.length>0)
       filteredCards = filteredCards.filter(({art_variant})=> art_variant === 0)
 
-      if(sortCriteria!=='none')
       filteredCards.sort((a, b)=> {
-          if(sortCriteria === 'costASC')
+          console.log(a.code, b.code);
+          if(sortCriteria === 'code')
+            return a.code.localeCompare(b.code);
+          else if(sortCriteria === 'costASC')
             return a.cost - b.cost;
           else if (sortCriteria === 'costDESC')
             return b.cost - a.cost;
