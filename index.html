@@ -255,7 +255,7 @@
       )
       if(counterFilter.length>0)
       filteredCards = filteredCards.filter(({counter}) =>
-        counterFilter.includes(counter)
+        counterFilter.includes(counter.toString())
       )
       if(alternateArtFilter.length>0)
       filteredCards = filteredCards.filter(({art_variant})=> art_variant === 0)
