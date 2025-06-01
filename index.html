@@ -337,7 +337,7 @@
         </label>
       </div>
       <div class="search">
-        <label>Text Search:</label>
+        <label>Text Search (seperated by commas):</label>
         <input type="text" placeholder="strawhat" onchange="updateFilteredCards()" />
       </div>
       <div class="alternate">
@@ -676,11 +676,15 @@
       filteredCards = allCards;
 
 
-      if(searchFilter)
-        filteredCards = filteredCards.filter(({name, type, effect, trigger, code})=>{
-          const searchableFields = [name, type, effect, trigger, code];
-          return searchableFields.some((field)=> field.toLowerCase().includes(searchFilter.toLowerCase()));
-      })
+      if(searchFilter) {
+        // Support comma-separated AND search for multiple terms
+        const terms = searchFilter.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+        filteredCards = filteredCards.filter(({name, type, effect, trigger, code}) => {
+          const searchableFields = [name, type, effect, trigger, code].map(f => (f || '').toLowerCase());
+          // All terms must be found in any field
+          return terms.every(term => searchableFields.some(field => field.includes(term)));
+        });
+      }
       if(colorFilter.length>0)
         filteredCards = filteredCards.filter(({color}) =>
           colorFilter.includes(color.toLowerCase())
@@ -1038,11 +1042,15 @@
       filteredCards = allCards;
 
 
-      if(searchFilter)
-        filteredCards = filteredCards.filter(({name, type, effect, trigger, code})=>{
-          const searchableFields = [name, type, effect, trigger, code];
-          return searchableFields.some((field)=> field.toLowerCase().includes(searchFilter.toLowerCase()));
-      })
+      if(searchFilter) {
+        // Support comma-separated AND search for multiple terms
+        const terms = searchFilter.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+        filteredCards = filteredCards.filter(({name, type, effect, trigger, code}) => {
+          const searchableFields = [name, type, effect, trigger, code].map(f => (f || '').toLowerCase());
+          // All terms must be found in any field
+          return terms.every(term => searchableFields.some(field => field.includes(term)));
+        });
+      }
       if(colorFilter.length>0)
         filteredCards = filteredCards.filter(({color}) =>
           colorFilter.includes(color.toLowerCase())
