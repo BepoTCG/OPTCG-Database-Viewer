@@ -324,7 +324,7 @@
       .then(data => {
         console.log({data, test:{...data.cards[0], ...data.card_locales[0]}});
         allCards.push(...data.cards.map(card=> {
-          translation = data.card_locales.find((translation) => translation.code === card.code && translation.art_variant === card.art_variant);
+          translation = data.card_locales.find((translation) => translation.card_code === card.code && translation.art_variant === card.art_variant);
           return {...card, ...translation, backup_image: card.image}
         }
         ));
