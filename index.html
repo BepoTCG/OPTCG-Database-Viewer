@@ -235,6 +235,7 @@
         <button type="button" name="save-deck">Save</button>
         <button type="button" name="load-deck">Load</button>
         <button type="button" name="delete-deck" style="color:#b00;">Delete</button>
+        <button type="button" name="export-deck" style="color:#007bff;">Export</button>
         <div class="deck-counters"></div>
       </div>
       <div class="deck-miniatures"></div>
@@ -405,6 +406,7 @@
     const saveDeckBtn = document.querySelector('button[name="save-deck"]');
     const loadDeckBtn = document.querySelector('button[name="load-deck"]');
     const deleteDeckBtn = document.querySelector('button[name="delete-deck"]');
+    const exportDeckBtn = document.querySelector('button[name="export-deck"]');
     const deckCounters = document.querySelector('.deck-counters');
 
     function renderDeckCounters() {
@@ -739,9 +741,7 @@
       }
       if(colorFilter.length>0)
         filteredCards = filteredCards.filter(({color, category}) => {
-          // Always include leaders regardless of color filter
-          if (category && category.toLowerCase() === 'leader') return true;
-          return colorFilter.includes(color.toLowerCase());
+          return color.split(' ').every( c => colorFilter.includes(c.toLowerCase()));
         })
       if(categoryFilter.length>0)
       filteredCards = filteredCards.filter(({category}) =>
@@ -1204,6 +1204,28 @@
       }
     };
     document.querySelector('button[name="delete-deck"]').onclick = deleteSelectedDeck;
+
+    exportDeckBtn.onclick = function() {
+      if (currentDeck.length === 0) {
+        showToast('Deck is empty.');
+        return;
+      }
+      // Count cards by code
+      const cardCount = {};
+      currentDeck.forEach(card => {
+        const key = card.code;
+        if (!cardCount[key]) cardCount[key] = 0;
+        cardCount[key]++;
+      });
+      // Format: CODE xN (one per line)
+      const lines = Object.entries(cardCount).map(([code, count]) => `${code} x${count}`);
+      const text = lines.join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Deck exported to clipboard!');
+      }, () => {
+        showToast('Failed to copy deck.');
+      });
+    };
 
     fetch('OPTCG.json')
       .then(response => response.json())
