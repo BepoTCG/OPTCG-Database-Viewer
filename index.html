@@ -24,6 +24,8 @@
       justify-content: center;
       align-items: flex-start;
       flex-wrap: wrap;
+      /* Add relative positioning for positioning zoomed cards */
+      position: relative;
     }
     .card {
       margin: 1em;
@@ -36,6 +38,9 @@
 
       width: 194px;
       height: 271px;
+      /* Needed for stacking context */
+      position: relative;
+      z-index: 1;
     }
     .card.maxed {
       /* Remove always-on grayscale, only apply on hover */
@@ -48,9 +53,39 @@
     }
     .card-image {
       transition: all 0.15s ease-in-out;
+      z-index: 2;
+      /* Ensure image is above other cards when zoomed */
     }
-    .card-image:hover{
+    .card:hover .card-image {
+      /* Zoom effect */
       transform: scale(1.7);
+      z-index: 10;
+      /* Show above other cards */
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+
+    /* Prevent clipping for zoomed cards on edges */
+    .card:hover {
+      z-index: 20;
+    }
+
+    .card-image {
+      /* Make sure overflow is visible for zoomed image */
+      overflow: visible;
+    }
+
+    /* Responsive adjustment for zoomed cards near edges */
+    @media (min-width: 600px) {
+      .card:hover .card-image {
+        /* Default: center zoom */
+        transform-origin: center center;
+      }
+      .card.left-edge:hover .card-image {
+        transform-origin: left center;
+      }
+      .card.right-edge:hover .card-image {
+        transform-origin: right center;
+      }
     }
 
     .card-content {
@@ -605,13 +640,30 @@
 
     function setupCardClickHandlers() {
       document.querySelectorAll('.card').forEach((cardDiv, idx) => {
+        // Remove any previous edge classes
+        cardDiv.classList.remove('left-edge', 'right-edge');
+        // Edge detection for zoom effect
+        const rect = cardDiv.getBoundingClientRect();
+        const padding = 60; // px, adjust for zoom margin
+        if (rect.left < padding) {
+          cardDiv.classList.add('left-edge');
+        } else if (window.innerWidth - rect.right < padding) {
+          cardDiv.classList.add('right-edge');
+        }
         // Always recalculate count/maxCount on each event for up-to-date state
         const cardData = filteredCards[idx];
         const isLeader = cardData.category && cardData.category.toLowerCase() === 'leader';
         cardDiv.onmouseenter = cardDiv.onmousemove = function() {
+          // Edge detection on hover (in case of resize/scroll)
+          cardDiv.classList.remove('left-edge', 'right-edge');
+          const rect = cardDiv.getBoundingClientRect();
+          if (rect.left < padding) {
+            cardDiv.classList.add('left-edge');
+          } else if (window.innerWidth - rect.right < padding) {
+            cardDiv.classList.add('right-edge');
+          }
           const count = currentDeck.filter(c => c.code === cardData.code).length;
           const maxCount = isLeader ? 1 : 4;
-          // Also gray out if deck is full
           if (count >= maxCount || currentDeck.length >= 51) {
             cardDiv.classList.add('maxed');
             cardDiv.style.cursor = 'not-allowed';
@@ -686,9 +738,11 @@
         });
       }
       if(colorFilter.length>0)
-        filteredCards = filteredCards.filter(({color}) =>
-          colorFilter.includes(color.toLowerCase())
-        )
+        filteredCards = filteredCards.filter(({color, category}) => {
+          // Always include leaders regardless of color filter
+          if (category && category.toLowerCase() === 'leader') return true;
+          return colorFilter.includes(color.toLowerCase());
+        })
       if(categoryFilter.length>0)
       filteredCards = filteredCards.filter(({category}) =>
         categoryFilter.includes(category.toLowerCase())
@@ -971,13 +1025,30 @@
 
     function setupCardClickHandlers() {
       document.querySelectorAll('.card').forEach((cardDiv, idx) => {
+        // Remove any previous edge classes
+        cardDiv.classList.remove('left-edge', 'right-edge');
+        // Edge detection for zoom effect
+        const rect = cardDiv.getBoundingClientRect();
+        const padding = 60; // px, adjust for zoom margin
+        if (rect.left < padding) {
+          cardDiv.classList.add('left-edge');
+        } else if (window.innerWidth - rect.right < padding) {
+          cardDiv.classList.add('right-edge');
+        }
         // Always recalculate count/maxCount on each event for up-to-date state
         const cardData = filteredCards[idx];
         const isLeader = cardData.category && cardData.category.toLowerCase() === 'leader';
         cardDiv.onmouseenter = cardDiv.onmousemove = function() {
+          // Edge detection on hover (in case of resize/scroll)
+          cardDiv.classList.remove('left-edge', 'right-edge');
+          const rect = cardDiv.getBoundingClientRect();
+          if (rect.left < padding) {
+            cardDiv.classList.add('left-edge');
+          } else if (window.innerWidth - rect.right < padding) {
+            cardDiv.classList.add('right-edge');
+          }
           const count = currentDeck.filter(c => c.code === cardData.code).length;
           const maxCount = isLeader ? 1 : 4;
-          // Also gray out if deck is full
           if (count >= maxCount || currentDeck.length >= 51) {
             cardDiv.classList.add('maxed');
             cardDiv.style.cursor = 'not-allowed';
@@ -1052,9 +1123,9 @@
         });
       }
       if(colorFilter.length>0)
-        filteredCards = filteredCards.filter(({color}) =>
-          colorFilter.includes(color.toLowerCase())
-        )
+        filteredCards = filteredCards.filter(({color, category}) => {
+          return color.split(' ').every( c => colorFilter.includes(c.toLowerCase()));
+        })
       if(categoryFilter.length>0)
       filteredCards = filteredCards.filter(({category}) =>
         categoryFilter.includes(category.toLowerCase())
