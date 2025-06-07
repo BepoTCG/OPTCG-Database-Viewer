@@ -6,6 +6,7 @@
   <title>OPTCG Card List</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="multi-select-dropdown.css">
 </head>
 <body>
   <header style="border-bottom: 1px solid #ccc; padding: 0.5em; margin-bottom: 1em; font-size: 15px;">
@@ -94,72 +95,11 @@
             2000
         </label>
       </div>
-      <div>
-        <label>Effects:</label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="atk">
-          When Attacking
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="don">
-          DON!! x
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="oatk">
-          On Your Opponent's Attack
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="opt">
-          Once Per Turn
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="opl">
-          On Play
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="rsh">
-          Rush
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="blk">
-          Blocker
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="onblk">
-          On Block
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="main">
-          Activate: Main
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="trg">
-          Trigger
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="ctr">
-          Counter
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="end">
-          End of Your Turn
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="oko">
-          On K.O.
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="trn">
-          Your Turn
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="bsh">
-          Banish
-        </label>
-        <label>
-          <input type="checkbox" name="tag" onchange="updateFilteredCards()" value="dbl">
-          Double Attack
-        </label>
+      <div class="keywords-filter-inline">
+        <button type="button" id="keywordsFilterBtn" class="small">Keywords</button>
+        <div class="effects-filter-inline">
+          <button type="button" id="effectsFilterBtn" class="small">Effects</button>
+        </div>
       </div>
       <div class="search">
         <label>Text Search (seperated by commas):</label>
@@ -184,6 +124,47 @@
     <div class="card-container"></div>
   </main>
 
+  <div id="effectsModal" class="effects-modal">
+    <div class="effects-modal-content">
+      <h4>Filter by Effects</h4>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="effect" value="draw"> Draw</label>
+        <label><input type="checkbox" name="effect" value="search"> Search</label>
+        <label><input type="checkbox" name="effect" value="destroy"> Destroy</label>
+        <label><input type="checkbox" name="effect" value="heal"> Heal</label>
+        <label><input type="checkbox" name="effect" value="boost"> Boost</label>
+        <label><input type="checkbox" name="effect" value="block"> Block</label>
+      </div>
+      <button type="button" id="closeEffectsModal">Close</button>
+    </div>
+  </div>
+
+  <div id="keywordsModal" class="keywords-modal">
+    <div class="keywords-modal-content">
+      <h4>Filter by Keywords</h4>
+      <div class="checkbox-grid">
+        <label><input type="checkbox" name="tag" value="atk" onchange="updateFilteredCards()"> When Attacking</label>
+        <label><input type="checkbox" name="tag" value="don" onchange="updateFilteredCards()"> DON!! x</label>
+        <label><input type="checkbox" name="tag" value="oatk" onchange="updateFilteredCards()"> On Your Opponent's Attack</label>
+        <label><input type="checkbox" name="tag" value="opt" onchange="updateFilteredCards()"> Once Per Turn</label>
+        <label><input type="checkbox" name="tag" value="opl" onchange="updateFilteredCards()"> On Play</label>
+        <label><input type="checkbox" name="tag" value="rsh" onchange="updateFilteredCards()"> Rush</label>
+        <label><input type="checkbox" name="tag" value="blk" onchange="updateFilteredCards()"> Blocker</label>
+        <label><input type="checkbox" name="tag" value="onblk" onchange="updateFilteredCards()"> On Block</label>
+        <label><input type="checkbox" name="tag" value="main" onchange="updateFilteredCards()"> Activate: Main</label>
+        <label><input type="checkbox" name="tag" value="trg" onchange="updateFilteredCards()"> Trigger</label>
+        <label><input type="checkbox" name="tag" value="ctr" onchange="updateFilteredCards()"> Counter</label>
+        <label><input type="checkbox" name="tag" value="end" onchange="updateFilteredCards()"> End of Your Turn</label>
+        <label><input type="checkbox" name="tag" value="oko" onchange="updateFilteredCards()"> On K.O.</label>
+        <label><input type="checkbox" name="tag" value="trn" onchange="updateFilteredCards()"> Your Turn</label>
+        <label><input type="checkbox" name="tag" value="bsh" onchange="updateFilteredCards()"> Banish</label>
+        <label><input type="checkbox" name="tag" value="dbl" onchange="updateFilteredCards()"> Double Attack</label>
+      </div>
+      <button type="button" id="closeKeywordsModal">Close</button>
+    </div>
+  </div>
+
+  <script src="multi-select-dropdown.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

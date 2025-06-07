@@ -356,9 +356,19 @@ function updateFilteredCards() {
     .map(({ value, checked }) => checked && value)
     .filter((value) => !!value);
   const sortCriteria = document.querySelector(".sort select").value;
-  const tagCriteria = Array.from(document.querySelectorAll("input[name='tag']"))
-    .map(({ value, checked }) => checked && value)
-    .filter((value) => !!value);
+  // Keywords filter (multi-select)
+  const keywordsSelect = document.getElementById("keywordsSelect");
+  let tagCriteria = [];
+  if (keywordsSelect) {
+    tagCriteria = Array.from(keywordsSelect.selectedOptions).map(
+      (opt) => opt.value
+    );
+  } else {
+    // fallback for legacy checkboxes (should not be needed)
+    tagCriteria = Array.from(document.querySelectorAll("input[name='tag']"))
+      .map(({ value, checked }) => checked && value)
+      .filter((value) => !!value);
+  }
   filteredCards = allCards;
   if (searchFilter) {
     const terms = searchFilter
@@ -366,10 +376,18 @@ function updateFilteredCards() {
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
     filteredCards = filteredCards.filter(
-      ({ name, type, effect, trigger, code }) => {
-        const searchableFields = [name, type, effect, trigger, code].map((f) =>
-          (f || "").toLowerCase()
-        );
+      ({ name, type, effect, trigger, code, original_text }) => {
+        const searchableFields = [
+          name,
+          type,
+          effect,
+          trigger,
+          code,
+          original_text.name,
+          original_text.type,
+          original_text.effect,
+          original_text.trigger,
+        ].map((f) => (f || "").toLowerCase());
         return terms.every((term) =>
           searchableFields.some((field) => field.includes(term))
         );
@@ -522,7 +540,17 @@ fetch("OPTCG.json")
             translation.card_code === card.code &&
             translation.art_variant === card.art_variant
         );
-        return { ...card, ...translation, backup_image: card.image };
+        return {
+          ...card,
+          ...translation,
+          original_text: {
+            name: card.name,
+            type: card.type,
+            effect: card.effect,
+            trigger: card.trigger,
+          },
+          backup_image: card.image,
+        };
       })
     );
     filteredCards = allCards;
@@ -535,3 +563,52 @@ fetch("OPTCG.json")
     message.textContent = "Error loading card data.";
     cardContainer.appendChild(message);
   });
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Keywords modal logic
+  const keywordsBtn = document.getElementById("keywordsFilterBtn");
+  const keywordsModal = document.getElementById("keywordsModal");
+  const closeKeywordsModal = document.getElementById("closeKeywordsModal");
+  if (keywordsBtn && keywordsModal && closeKeywordsModal) {
+    keywordsBtn.addEventListener("click", () => {
+      keywordsModal.style.display = "flex";
+    });
+    closeKeywordsModal.addEventListener("click", () => {
+      keywordsModal.style.display = "none";
+    });
+    keywordsModal.addEventListener("mousedown", (e) => {
+      if (e.target === keywordsModal) {
+        keywordsModal.style.display = "none";
+      }
+    });
+  }
+  // Initialize MultiSelect for keywords
+  const keywordsSelect = document.getElementById("keywordsSelect");
+  if (keywordsSelect && typeof MultiSelect !== "undefined") {
+    new MultiSelect(keywordsSelect, {
+      placeholder: "Select keywords",
+      search: false, // Disable search box
+      selectAll: true,
+      onChange: function () {
+        updateFilteredCards();
+      },
+    });
+  }
+  const effectsBtn = document.getElementById("effectsFilterBtn");
+  const effectsModal = document.getElementById("effectsModal");
+  const closeEffectsModal = document.getElementById("closeEffectsModal");
+  if (effectsBtn && effectsModal && closeEffectsModal) {
+    effectsBtn.addEventListener("click", () => {
+      effectsModal.style.display = "flex";
+    });
+    closeEffectsModal.addEventListener("click", () => {
+      effectsModal.style.display = "none";
+    });
+    // Close modal when clicking outside the modal content
+    effectsModal.addEventListener("mousedown", (e) => {
+      if (e.target === effectsModal) {
+        effectsModal.style.display = "none";
+      }
+    });
+  }
+});
