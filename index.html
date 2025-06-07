@@ -6,7 +6,6 @@
   <title>OPTCG Card List</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="multi-select-dropdown.css">
 </head>
 <body>
   <header style="border-bottom: 1px solid #ccc; padding: 0.5em; margin-bottom: 1em; font-size: 15px;">
@@ -97,10 +96,9 @@
       </div>
       <div class="keywords-filter-inline">
         <button type="button" id="keywordsFilterBtn" class="small">Keywords</button>
-        <div class="effects-filter-inline">
-          <button type="button" id="effectsFilterBtn" class="small">Effects</button>
-        </div>
+        <button type="button" id="effectsFilterBtn" class="small">Effects</button>
       </div>
+      <div id="selectedFiltersPrint" style="margin:0.3em 0 0.7em 0;font-size:0.97em;"></div>
       <div class="search">
         <label>Text Search (seperated by commas):</label>
         <input type="text" placeholder="strawhat" onchange="updateFilteredCards()" />
@@ -128,12 +126,13 @@
     <div class="effects-modal-content">
       <h4>Filter by Effects</h4>
       <div class="checkbox-grid">
-        <label><input type="checkbox" name="effect" value="draw"> Draw</label>
-        <label><input type="checkbox" name="effect" value="search"> Search</label>
-        <label><input type="checkbox" name="effect" value="destroy"> Destroy</label>
-        <label><input type="checkbox" name="effect" value="heal"> Heal</label>
-        <label><input type="checkbox" name="effect" value="boost"> Boost</label>
-        <label><input type="checkbox" name="effect" value="block"> Block</label>
+        <label><input type="checkbox" name="effect" value="cost-minus"> Cost -</label>
+        <label><input type="checkbox" name="effect" value="cost-plus"> Cost +</label>
+        <label><input type="checkbox" name="effect" value="power-minus"> Power -</label>
+        <label><input type="checkbox" name="effect" value="power-plus"> Power +</label>
+        <label><input type="checkbox" name="effect" value="rest-effect"> Rest (effect)</label>
+        <label><input type="checkbox" name="effect" value="rest-condition"> Rest (condition)</label>
+        <label><input type="checkbox" name="effect" value="ko"> K.O.</label>
       </div>
       <button type="button" id="closeEffectsModal">Close</button>
     </div>
@@ -164,7 +163,6 @@
     </div>
   </div>
 
-  <script src="multi-select-dropdown.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

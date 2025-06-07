@@ -370,11 +370,47 @@ function updateFilteredCards() {
       .filter((value) => !!value);
   }
   filteredCards = allCards;
-  if (searchFilter) {
-    const terms = searchFilter
-      .split(",")
-      .map((t) => t.trim().toLowerCase())
-      .filter(Boolean);
+  // Effects modal: inject コスト- and コスト+ into search terms if checked
+  const costMinusCheckbox = document.querySelector(
+    'input[name="effect"][value="cost-minus"]'
+  );
+  const costPlusCheckbox = document.querySelector(
+    'input[name="effect"][value="cost-plus"]'
+  );
+  const powerMinusCheckbox = document.querySelector(
+    'input[name="effect"][value="power-minus"]'
+  );
+  const powerPlusCheckbox = document.querySelector(
+    'input[name="effect"][value="power-plus"]'
+  );
+  const restEffectCheckbox = document.querySelector(
+    'input[name="effect"][value="rest-effect"]'
+  );
+  const restConditionCheckbox = document.querySelector(
+    'input[name="effect"][value="rest-condition"]'
+  );
+  const koCheckbox = document.querySelector('input[name="effect"][value="ko"]');
+  let extraTerms = [];
+  if (costMinusCheckbox && costMinusCheckbox.checked)
+    extraTerms.push("コスト-");
+  if (costPlusCheckbox && costPlusCheckbox.checked) extraTerms.push("コスト+");
+  if (powerMinusCheckbox && powerMinusCheckbox.checked)
+    extraTerms.push("パワー-");
+  if (powerPlusCheckbox && powerPlusCheckbox.checked)
+    extraTerms.push("パワー+");
+  if (restEffectCheckbox && restEffectCheckbox.checked)
+    extraTerms.push("レストにする");
+  if (restConditionCheckbox && restConditionCheckbox.checked)
+    extraTerms.push("レストにできる");
+  if (koCheckbox && koCheckbox.checked) extraTerms.push("KOする");
+  if (searchFilter || extraTerms.length > 0) {
+    const terms = [
+      ...searchFilter
+        .split(",")
+        .map((t) => t.trim().toLowerCase())
+        .filter(Boolean),
+      ...extraTerms.map((t) => t.toLowerCase()),
+    ];
     filteredCards = filteredCards.filter(
       ({ name, type, effect, trigger, code, original_text }) => {
         const searchableFields = [
@@ -582,18 +618,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-  // Initialize MultiSelect for keywords
-  const keywordsSelect = document.getElementById("keywordsSelect");
-  if (keywordsSelect && typeof MultiSelect !== "undefined") {
-    new MultiSelect(keywordsSelect, {
-      placeholder: "Select keywords",
-      search: false, // Disable search box
-      selectAll: true,
-      onChange: function () {
-        updateFilteredCards();
-      },
-    });
-  }
+
+  // Effects modal logic (Cost - / Cost + checkboxes)
   const effectsBtn = document.getElementById("effectsFilterBtn");
   const effectsModal = document.getElementById("effectsModal");
   const closeEffectsModal = document.getElementById("closeEffectsModal");
@@ -604,11 +630,175 @@ document.addEventListener("DOMContentLoaded", function () {
     closeEffectsModal.addEventListener("click", () => {
       effectsModal.style.display = "none";
     });
-    // Close modal when clicking outside the modal content
     effectsModal.addEventListener("mousedown", (e) => {
       if (e.target === effectsModal) {
         effectsModal.style.display = "none";
       }
     });
   }
+});
+
+// --- Render selected filters under each button ---
+function renderSelectedFilters() {
+  // Keywords (from modal checkboxes)
+  const keywordLabels = {
+    atk: "When Attacking",
+    don: "DON!! x",
+    oatk: "On Your Opponent's Attack",
+    opt: "Once Per Turn",
+    opl: "On Play",
+    rsh: "Rush",
+    blk: "Blocker",
+    onblk: "On Block",
+    main: "Activate: Main",
+    trg: "Trigger",
+    ctr: "Counter",
+    end: "End of Your Turn",
+    oko: "On K.O.",
+    trn: "Your Turn",
+    bsh: "Banish",
+    dbl: "Double Attack",
+  };
+  const checkedKeywordCheckboxes = Array.from(
+    document.querySelectorAll('input[name="tag"]:checked')
+  );
+  const selectedKeywords = checkedKeywordCheckboxes.map(
+    (cb) => keywordLabels[cb.value] || cb.value
+  );
+
+  // Effects (from modal checkboxes)
+  const effectMap = {
+    "cost-minus": "Cost -",
+    "cost-plus": "Cost +",
+    "power-minus": "Power -",
+    "power-plus": "Power +",
+    "rest-effect": "Rest (effect)",
+    "rest-condition": "Rest (condition)",
+    ko: "K.O.",
+  };
+  const selectedEffects = Object.entries(effectMap)
+    .filter(([val]) => {
+      const cb = document.querySelector(`input[name='effect'][value='${val}']`);
+      return cb && cb.checked;
+    })
+    .map(([, label]) => label);
+
+  // Render under each button
+  // Keywords
+  let kwLabel = "";
+  if (selectedKeywords.length > 0) {
+    kwLabel = `<span class='selected-filter-label'><b>Keywords:</b> ${selectedKeywords.join(
+      ", "
+    )}</span>`;
+  }
+  let kwContainer = document.getElementById("selectedKeywordsPrint");
+  if (!kwContainer) {
+    const btn = document.getElementById("keywordsFilterBtn");
+    if (btn) {
+      kwContainer = document.createElement("div");
+      kwContainer.id = "selectedKeywordsPrint";
+      kwContainer.style.margin = "0.2em 0 0.5em 0";
+      btn.insertAdjacentElement("afterend", kwContainer);
+    }
+  }
+  if (kwContainer) {
+    kwContainer.innerHTML = kwLabel;
+    kwContainer.style.display = kwLabel ? "" : "none";
+  }
+  // Effects
+  let effLabel = "";
+  if (selectedEffects.length > 0) {
+    effLabel = `<span class='selected-filter-label'><b>Effects:</b> ${selectedEffects.join(
+      ", "
+    )}</span>`;
+  }
+  let effContainer = document.getElementById("selectedEffectsPrint");
+  if (!effContainer) {
+    const btn = document.getElementById("effectsFilterBtn");
+    if (btn) {
+      effContainer = document.createElement("div");
+      effContainer.id = "selectedEffectsPrint";
+      effContainer.style.margin = "0.2em 0 0.5em 0";
+      btn.insertAdjacentElement("afterend", effContainer);
+    }
+  }
+  if (effContainer) {
+    effContainer.innerHTML = effLabel;
+    effContainer.style.display = effLabel ? "" : "none";
+  }
+}
+
+// Call after filter changes
+function setupSelectedFiltersPrint() {
+  // Insert the print container if not present
+  let container = document.getElementById("selectedFiltersPrint");
+  if (!container) {
+    // Place under the filter buttons (assume .filter-controls exists)
+    const filterControls = document.querySelector(".filter-controls");
+    if (filterControls) {
+      container = document.createElement("div");
+      container.id = "selectedFiltersPrint";
+      container.style.margin = "0.3em 0 0.7em 0";
+      container.style.fontSize = "0.97em";
+      filterControls.appendChild(container);
+    }
+  }
+  renderSelectedFilters();
+}
+
+// Patch updateFilteredCards and modal listeners to call renderSelectedFilters
+const origUpdateFilteredCards = updateFilteredCards;
+updateFilteredCards = function () {
+  origUpdateFilteredCards.apply(this, arguments);
+  renderSelectedFilters();
+};
+
+// --- Add event listeners to effect checkboxes to update filters live ---
+function setupEffectFilterListeners() {
+  const effectCheckboxes = document.querySelectorAll('input[name="effect"]');
+  effectCheckboxes.forEach((cb) => {
+    cb.addEventListener("change", () => {
+      updateFilteredCards();
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Keywords modal logic
+  const keywordsBtn = document.getElementById("keywordsFilterBtn");
+  const keywordsModal = document.getElementById("keywordsModal");
+  const closeKeywordsModal = document.getElementById("closeKeywordsModal");
+  if (keywordsBtn && keywordsModal && closeKeywordsModal) {
+    keywordsBtn.addEventListener("click", () => {
+      keywordsModal.style.display = "flex";
+    });
+    closeKeywordsModal.addEventListener("click", () => {
+      keywordsModal.style.display = "none";
+    });
+    keywordsModal.addEventListener("mousedown", (e) => {
+      if (e.target === keywordsModal) {
+        keywordsModal.style.display = "none";
+      }
+    });
+  }
+
+  // Effects modal logic (Cost - / Cost + checkboxes)
+  const effectsBtn = document.getElementById("effectsFilterBtn");
+  const effectsModal = document.getElementById("effectsModal");
+  const closeEffectsModal = document.getElementById("closeEffectsModal");
+  if (effectsBtn && effectsModal && closeEffectsModal) {
+    effectsBtn.addEventListener("click", () => {
+      effectsModal.style.display = "flex";
+    });
+    closeEffectsModal.addEventListener("click", () => {
+      effectsModal.style.display = "none";
+    });
+    effectsModal.addEventListener("mousedown", (e) => {
+      if (e.target === effectsModal) {
+        effectsModal.style.display = "none";
+      }
+    });
+  }
+
+  setupEffectFilterListeners();
 });
