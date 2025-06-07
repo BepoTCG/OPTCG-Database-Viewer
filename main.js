@@ -454,6 +454,13 @@ function updateFilteredCards() {
       const tagSet = new Set(tags.split(","));
       return tagCriteria.every((element) => tagSet.has(element));
     });
+  // Deduplicate filteredCards by card.code (keep first occurrence)
+  const seenCodes = new Set();
+  filteredCards = filteredCards.filter((card) => {
+    if (seenCodes.has(card.code)) return false;
+    seenCodes.add(card.code);
+    return true;
+  });
   filteredCards.sort((a, b) => {
     if (sortCriteria === "code") return a.code.localeCompare(b.code);
     else if (sortCriteria === "costASC") return a.cost - b.cost;
