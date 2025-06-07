@@ -383,6 +383,8 @@ function updateFilteredCards() {
   const powerPlusCheckbox = document.querySelector(
     'input[name="effect"][value="power-plus"]'
   );
+  const powerPlusTurnCheckbox = document.querySelector('input[name="effect"][value="power-plus-turn"]');
+  const powerMinusTurnCheckbox = document.querySelector('input[name="effect"][value="power-minus-turn"]');
   const restEffectCheckbox = document.querySelector(
     'input[name="effect"][value="rest-effect"]'
   );
@@ -398,6 +400,8 @@ function updateFilteredCards() {
     extraTerms.push("パワー-");
   if (powerPlusCheckbox && powerPlusCheckbox.checked)
     extraTerms.push("パワー+");
+  if (powerPlusTurnCheckbox && powerPlusTurnCheckbox.checked) extraTerms.push("ターン中、パワー+");
+  if (powerMinusTurnCheckbox && powerMinusTurnCheckbox.checked) extraTerms.push("ターン中、パワー-");
   if (restEffectCheckbox && restEffectCheckbox.checked)
     extraTerms.push("レストにする");
   if (restConditionCheckbox && restConditionCheckbox.checked)
@@ -679,6 +683,8 @@ function renderSelectedFilters() {
     "cost-plus": "Cost +",
     "power-minus": "Power -",
     "power-plus": "Power +",
+    "power-plus-turn": "Power+ (for turn)",
+    "power-minus-turn": "Power- (for turn)",
     "rest-effect": "Rest (effect)",
     "rest-condition": "Rest (condition)",
     ko: "K.O.",
